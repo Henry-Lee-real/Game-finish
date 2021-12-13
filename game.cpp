@@ -1,49 +1,49 @@
 #include"game.h"
 #include"bi_tree.h"
 #include"file.h"
-#include<graphics.h>//»­Í¼
+#include<graphics.h>//ç”»å›¾
 #include<conio.h>
 #include<cstdio>
-#include<time.h>//Ëæ»úÊı
-#include<pthread.h>//¶àÏß³Ì
-//_____________________________________ºê³£Á¿Çø______________________________________________
+#include<time.h>//éšæœºæ•°
+#include<pthread.h>//å¤šçº¿ç¨‹
+//_____________________________________å®å¸¸é‡åŒº______________________________________________
 int back = 1;
 int score = 0;
-pthread_t a;//Ïß³ÌµÄÃû×Ö
-int sum = 0;//¼ÇÂ¼·ÖÊı
-int x, y;   //ĞÇÇòµÄ×ø±ê
-int rb[] = { 1,1,81,41 };//·µ»Ø°´Å¥×ø±ê
+pthread_t a;//çº¿ç¨‹çš„åå­—
+int sum = 0;//è®°å½•åˆ†æ•°
+int x, y;   //æ˜Ÿçƒçš„åæ ‡
+int rb[] = { 1,1,81,41 };//è¿”å›æŒ‰é’®åæ ‡
 //___________________________________________________________________________________________
-//_____________________________________º¯ÊıÇø________________________________________________
-int game_moving(void);//ÓÎÏ·ÖĞĞ¡ºÚ¿ìµÄÒÆ¶¯£¬ÓÃµÄÊÇ'a's'd'w'°´Å¥µÄ¿ØÖÆ
-int wall(int r[]);//ÓÎÏ·ÖĞÇ½£¬·ÀÖ¹ÅÜ³ö±ß½ç
-int game_weapon(int r[]);//¹ØÓÚ¼¤¹âÎäÆ÷µÄ³ÊÏÖ
-void random_pos(int *x ,int *y);//ĞÇÇò³öÏÖµÄÎ»ÖÃ²¢»­³öÀ´
-int judge_weapon_pos(int* x, int* y, int p);//ÊÇ·ñ»÷ÖĞµÄÅĞ¶Ï
-void clean_star(int x, int y);//Çå³ıĞÇÇòµÄÍ¼Ïñ²¢ÓĞ±¬Õ¨Í¼Ñù
-void *boom(void* arg);	//¶àÏß³Ì²Ù×÷£¬µ¥¶À¿ª¸öÏß³Ì¼ÆÊ±
+//_____________________________________å‡½æ•°åŒº________________________________________________
+int game_moving(void);//æ¸¸æˆä¸­å°é»‘å¿«çš„ç§»åŠ¨ï¼Œç”¨çš„æ˜¯'a's'd'w'æŒ‰é’®çš„æ§åˆ¶
+int wall(int r[]);//æ¸¸æˆä¸­å¢™ï¼Œé˜²æ­¢è·‘å‡ºè¾¹ç•Œ
+int game_weapon(int r[]);//å…³äºæ¿€å…‰æ­¦å™¨çš„å‘ˆç°
+void random_pos(int *x ,int *y);//æ˜Ÿçƒå‡ºç°çš„ä½ç½®å¹¶ç”»å‡ºæ¥
+int judge_weapon_pos(int* x, int* y, int p);//æ˜¯å¦å‡»ä¸­çš„åˆ¤æ–­
+void clean_star(int x, int y);//æ¸…é™¤æ˜Ÿçƒçš„å›¾åƒå¹¶æœ‰çˆ†ç‚¸å›¾æ ·
+void *boom(void* arg);	//å¤šçº¿ç¨‹æ“ä½œï¼Œå•ç‹¬å¼€ä¸ªçº¿ç¨‹è®¡æ—¶
 char* convert1(wchar_t* pwszUnicode);
 //___________________________________________________________________________________________
-int play_screen(void)//³ÊÏÖÓÎÏ·µÄ³õÊ¼½çÃæ
+int play_screen(void)//å‘ˆç°æ¸¸æˆçš„åˆå§‹ç•Œé¢
 {
-	initgraph(1000, 600, EW_NOMINIMIZE | EW_NOCLOSE);//»­³ö½çÃæ
+	initgraph(1000, 600, EW_NOMINIMIZE | EW_NOCLOSE);//ç”»å‡ºç•Œé¢
 	setbkcolor(WHITE);
 	cleardevice();
 	LOGFONT b;
 	gettextstyle(&b);
 	b.lfHeight = 30;
-	_tcscpy_s(b.lfFaceName, _T("ºÚÌå"));
+	_tcscpy_s(b.lfFaceName, _T("é»‘ä½“"));
 	settextstyle(&b);
 	settextcolor(BLACK);
 	RECT RB = { rb[0],rb[1],rb[2],rb[3] };
 	drawtext(_T("HOME"), &RB, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-	rectangle(rb[0], rb[1], rb[2], rb[3]);//¸ñÊ½»¯Êä³öÎÄ±¾×Ö·û´®
+	rectangle(rb[0], rb[1], rb[2], rb[3]);//æ ¼å¼åŒ–è¾“å‡ºæ–‡æœ¬å­—ç¬¦ä¸²
 	wchar_t s[11];
-	InputBox(s, 40, L"ÇëÊäÈëÄãµÄĞÕÃû£¨ÖĞÎÄ<=5£©£º");//ÊäÈëÍæ¼ÒµÄÃû×ÖÎªwchar_tÀàĞÍ
+	InputBox(s, 40, L"è¯·è¾“å…¥ä½ çš„å§“åï¼ˆä¸­æ–‡<=5ï¼‰ï¼š");//è¾“å…¥ç©å®¶çš„åå­—ä¸ºwchar_tç±»å‹
 	LOGFONT n;
 	gettextstyle(&n);
 	n.lfHeight = 30;
-	_tcscpy_s(n.lfFaceName, _T("ºÚÌå"));//ÔÚ×ÀÃæÉÏ³ÊÏÖÍæ¼ÒµÄÃû×Ö
+	_tcscpy_s(n.lfFaceName, _T("é»‘ä½“"));//åœ¨æ¡Œé¢ä¸Šå‘ˆç°ç©å®¶çš„åå­—
 	settextstyle(&n);
 	settextcolor(RED);
 	RECT BN = { rb[0],rb[1] + 40,rb[2] + 80,rb[3] + 40 };
@@ -52,35 +52,35 @@ int play_screen(void)//³ÊÏÖÓÎÏ·µÄ³õÊ¼½çÃæ
 	LOGFONT w;
 	gettextstyle(&w);
 	b.lfHeight = 30;
-	_tcscpy_s(w.lfFaceName, _T("ºÚÌå"));
+	_tcscpy_s(w.lfFaceName, _T("é»‘ä½“"));
 	settextstyle(&w);
 	settextcolor(BLUE);
 	RECT R_1 = { 0, 170, 1000, 210 };
 	RECT R_2 = { 0, 210, 1000, 250 };
-	drawtext(_T("µÛ¹úµÄ¾ü½¢ÏòµØÃæÍ¶ÏÂÁËÕ¨µ¯£¬Õ¨µ¯»á¶¨Ê±±¬Õ¨"), &R_1, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("å¸å›½çš„å†›èˆ°å‘åœ°é¢æŠ•ä¸‹äº†ç‚¸å¼¹ï¼Œç‚¸å¼¹ä¼šå®šæ—¶çˆ†ç‚¸"), &R_1, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	rectangle(0, 170, 1000, 210);
 	Sleep(1000);
-	drawtext(_T("ÇëÔÚ±¬Õ¨Ç°ÓÃÒÆ¶¯µÄ¼¤¹âÅÚ°ÑÕ¨µ¯Çå³ı£¬·ñÕßÊ§°Ü£¬·ÖÊıÎªÇå³ıÕ¨µ¯Êı"), &R_2, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("è¯·åœ¨çˆ†ç‚¸å‰ç”¨ç§»åŠ¨çš„æ¿€å…‰ç‚®æŠŠç‚¸å¼¹æ¸…é™¤ï¼Œå¦è€…å¤±è´¥ï¼Œåˆ†æ•°ä¸ºæ¸…é™¤ç‚¸å¼¹æ•°"), &R_2, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	rectangle(0, 210, 1000, 250);
 	Sleep(1000);
 	RECT RW1 = { 50, 250, 950, 300};
 	RECT RW2 = { 50, 300, 950, 350 };
 	RECT RW3= { 50, 350, 950, 400 };
-	drawtext(_T("ÎïÌåÒÆ¶¯£ºÊ¹ÓÃw,a,s,d¼ü¿ØÖÆÒÆ¶¯"), &RW1, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("ç‰©ä½“ç§»åŠ¨ï¼šä½¿ç”¨w,a,s,dé”®æ§åˆ¶ç§»åŠ¨"), &RW1, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	rectangle(50, 250, 950, 3000);
 	Sleep(1000);
-	drawtext(_T("ÎäÆ÷¹¥»÷£ºÏÈ°´q,ÔÙÊ¹ÓÃw,a,s,d¼ü¿ØÖÆ·½Ïò"), &RW2, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("æ­¦å™¨æ”»å‡»ï¼šå…ˆæŒ‰q,å†ä½¿ç”¨w,a,s,dé”®æ§åˆ¶æ–¹å‘"), &RW2, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	rectangle(50, 300, 950, 350);
 	Sleep(1000);
-	drawtext(_T("¼üÅÌÇÃ»÷b·µ»Ø£¬µã»÷Ò³Ãæ½øÈëÓÎÏ·£¨×¢ÒâÒÔÉÏÒªÓÃÓ¢ÎÄ¸ñÊ½£©"), &RW3, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("é”®ç›˜æ•²å‡»bè¿”å›ï¼Œç‚¹å‡»é¡µé¢è¿›å…¥æ¸¸æˆï¼ˆæ³¨æ„ä»¥ä¸Šè¦ç”¨è‹±æ–‡æ ¼å¼ï¼‰"), &RW3, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	rectangle(50, 350, 950, 400);
-	MOUSEMSG m;//¶ÔÓÚÊó±êµÄ²Ù×÷µÄ·´À¡
+	MOUSEMSG m;//å¯¹äºé¼ æ ‡çš„æ“ä½œçš„åé¦ˆ
 	while (TRUE)
 	{
 		m = GetMouseMsg();
 		switch (m.uMsg)
 		{
-		case WM_MOUSEMOVE://¶ÔÓÚÊó±êÒÆ¶¯Î»ÖÃµÄÅĞ¶Ï£¬³öÏÖÊó±êÒÆ¶¯µ½°´Å¥ÉÏ·½ÓĞÌØĞ§µÄ³öÏÖ
+		case WM_MOUSEMOVE://å¯¹äºé¼ æ ‡ç§»åŠ¨ä½ç½®çš„åˆ¤æ–­ï¼Œå‡ºç°é¼ æ ‡ç§»åŠ¨åˆ°æŒ‰é’®ä¸Šæ–¹æœ‰ç‰¹æ•ˆçš„å‡ºç°
 			if (rb[0]<m.x && rb[1]<m.y && rb[2]>m.x && rb[3]>m.y) {
 				setlinecolor(RED);
 				rectangle(rb[0] + 3, rb[1] + 3, rb[2] - 3, rb[3] - 3);
@@ -91,13 +91,13 @@ int play_screen(void)//³ÊÏÖÓÎÏ·µÄ³õÊ¼½çÃæ
 			}
 			FlushMouseMsgBuffer();
 			break;
-		case WM_LBUTTONDOWN://µã»÷·µ»Ø°´Å¥À´µ½Ö÷²Ëµ¥
+		case WM_LBUTTONDOWN://ç‚¹å‡»è¿”å›æŒ‰é’®æ¥åˆ°ä¸»èœå•
 			if (rb[0]<m.x && rb[1]<m.y && rb[2]>m.x && rb[3]>m.y) {
 				//Read_number(p,1);
 				closegraph();
 				FlushMouseMsgBuffer();
 				system("cls");
-				printf("-----------------ÄãµÄµÃ·Ö£º%3d---------------", score);
+				printf("-----------------ä½ çš„å¾—åˆ†ï¼š%3d---------------", score);
 				Sleep(2000);
 				head = insert_link(score, head);
 				system("cls");
@@ -105,13 +105,13 @@ int play_screen(void)//³ÊÏÖÓÎÏ·µÄ³õÊ¼½çÃæ
 				return 0;
 
 			}
-		case WM_RBUTTONDOWN:///////////////////////µã»÷ÓÒ¼ü½øÈëÓÎÏ·
+		case WM_RBUTTONDOWN:///////////////////////ç‚¹å‡»å³é”®è¿›å…¥æ¸¸æˆ
 			int k = game_moving();
 			if (0 == k) {
 				LOGFONT b;
 				gettextstyle(&b);
 				b.lfHeight = 30;
-				_tcscpy_s(b.lfFaceName, _T("ºÚÌå"));
+				_tcscpy_s(b.lfFaceName, _T("é»‘ä½“"));
 				settextstyle(&b);
 				settextcolor(BLACK);
 				RECT RB = { rb[0],rb[1],rb[2],rb[3] };
@@ -134,11 +134,11 @@ int play_screen(void)//³ÊÏÖÓÎÏ·µÄ³õÊ¼½çÃæ
 				setlinecolor(RED);
 				rectangle(200, 200, 800, 400);
 				pthread_cancel(a);
-				Sleep(2000);//½çÃæÏÔÊ¾ÑÓ»ºÊ±¼ä
-				closegraph();//¹Ø±ÕÍ¼»­
-				FlushMouseMsgBuffer();//Çå³ı²ĞÓàµÄÊó±ê¶ÁÈëĞÅÏ¢
-				system("cls");//ÇåÆÁ
-				printf("-----------------ÄãµÄµÃ·Ö£º%3d---------------", score);//ÊµÔÚ×ª»»²»À´ÁË£¬¾ÍÓÃĞ¡ºÚ¿ò
+				Sleep(2000);//ç•Œé¢æ˜¾ç¤ºå»¶ç¼“æ—¶é—´
+				closegraph();//å…³é—­å›¾ç”»
+				FlushMouseMsgBuffer();//æ¸…é™¤æ®‹ä½™çš„é¼ æ ‡è¯»å…¥ä¿¡æ¯
+				system("cls");//æ¸…å±
+				printf("-----------------ä½ çš„å¾—åˆ†ï¼š%3d---------------", score);//å®åœ¨è½¬æ¢ä¸æ¥äº†ï¼Œå°±ç”¨å°é»‘æ¡†
 				Sleep(2000);
 				head=insert_link(score, head);
 				system("cls");
@@ -151,18 +151,18 @@ int play_screen(void)//³ÊÏÖÓÎÏ·µÄ³õÊ¼½çÃæ
 }
 int game_moving(void)
 {
-	int r[] = { 80,80,85,85 };//Ğ¡·½¿éµÄ³õÊ¼Î»ÖÃ
-	setbkcolor(WHITE);//¸üĞÂ×ÀÃæµÄ±³¾°
+	int r[] = { 80,80,85,85 };//å°æ–¹å—çš„åˆå§‹ä½ç½®
+	setbkcolor(WHITE);//æ›´æ–°æ¡Œé¢çš„èƒŒæ™¯
 	cleardevice();
 	setlinecolor(BLACK);
 	setfillcolor(BLACK);
 	rectangle(r[0], r[1], r[2], r[3]);
 	fillrectangle(r[0], r[1], r[2], r[3]);
-	random_pos(&x,&y);//»ñÈ¡Õ¨µ¯µÄËæ»úÎ»ÖÃ
+	random_pos(&x,&y);//è·å–ç‚¸å¼¹çš„éšæœºä½ç½®
 	char pos;
-	while (TRUE) {///¿ªÊ¼½øÈë¼üÅÌµÄ²Ù¿Ø½çÃæ£¬ÏÂÃæ¶¼ÊÇ¸÷ÖÖÒÆ¶¯ºó¶ÔÓÚÒÆ¶¯ºóµÄ²Ù×÷
-		          //Ò²¾ÍÊÇËµÓÃµÄÑÕÉ«¸²¸ÇÔ­À´µÄ²Ù×÷»­µÄÍ¼Ïñ
-		pos = _getch();//»ñÈ¡×Ö·ûµÄµÄ¶ÁÈëĞÅÏ¢
+	while (TRUE) {///å¼€å§‹è¿›å…¥é”®ç›˜çš„æ“æ§ç•Œé¢ï¼Œä¸‹é¢éƒ½æ˜¯å„ç§ç§»åŠ¨åå¯¹äºç§»åŠ¨åçš„æ“ä½œ
+		          //ä¹Ÿå°±æ˜¯è¯´ç”¨çš„é¢œè‰²è¦†ç›–åŸæ¥çš„æ“ä½œç”»çš„å›¾åƒ
+		pos = _getch();//è·å–å­—ç¬¦çš„çš„è¯»å…¥ä¿¡æ¯
 		switch (pos) {
 		case 'a':
 		case 'A':
@@ -274,7 +274,7 @@ int game_moving(void)
 		}
 	}
 }
-int wall(int r[])//»­²¼µÄ±ß½ç£¬ÅĞ¶ÏÊÇ·ñ³ö½çÏŞ
+int wall(int r[])//ç”»å¸ƒçš„è¾¹ç•Œï¼Œåˆ¤æ–­æ˜¯å¦å‡ºç•Œé™
 {
 	if (r[0] < 0 || r[1] < 0 || r[2]>1000 || r[3]>600)
 		return 1;
@@ -283,8 +283,8 @@ int wall(int r[])//»­²¼µÄ±ß½ç£¬ÅĞ¶ÏÊÇ·ñ³ö½çÏŞ
 int game_weapon(int r[])
 {
 	int k;
-	char face;//³¯Ïò
-	face = _getch();//»ñÈ¡½çÃæ¼üÅÌµÄ¶ÁÈëĞÅÏ¢
+	char face;//æœå‘
+	face = _getch();//è·å–ç•Œé¢é”®ç›˜çš„è¯»å…¥ä¿¡æ¯
 	switch (face)
 	{
 	case 'w':
@@ -348,19 +348,19 @@ int game_weapon(int r[])
 	}
 	return 1;
 }
-void random_pos(int* x, int* y)//Ëæ»ú»æÖÆÕ¨µ¯
+void random_pos(int* x, int* y)//éšæœºç»˜åˆ¶ç‚¸å¼¹
 {
 	//time_t i = (time_t)rand() % 10;
-	srand((unsigned int)time(0));//Ö²ÈëÖÖ×Ó
-	*x = rand() % 800+100;//¸ø³öÏàÓ¦µÄËæ»ú·¶Î§¡ª¡ªx
-	*y = rand() % 500+50;//¸ø³öÏàÓ¦µÄËæ»ú·¶Î§¡ª¡ªy
+	//srand((unsigned int)time(0));//æ¤å…¥ç§å­
+	*x = rand() % 800+100;//ç»™å‡ºç›¸åº”çš„éšæœºèŒƒå›´â€”â€”x
+	*y = rand() % 500+50;//ç»™å‡ºç›¸åº”çš„éšæœºèŒƒå›´â€”â€”y
 	setlinecolor(BLUE);
 	setfillcolor(BLUE);
 	circle(*x, *y, 5);
 	fillcircle(*x, *y, 5);
-	pthread_create(&a, NULL, boom, NULL);//»æÖÆºÃÕ¨µ¯ºó£¬Í¬Ê±½øĞĞ¶àÏß³Ì²Ù×÷£¬µ¹¼ÆÊ±²Ù×÷
+	pthread_create(&a, NULL, boom, NULL);//ç»˜åˆ¶å¥½ç‚¸å¼¹åï¼ŒåŒæ—¶è¿›è¡Œå¤šçº¿ç¨‹æ“ä½œï¼Œå€’è®¡æ—¶æ“ä½œ
 }
-int judge_weapon_pos(int *x, int *y, int p)//ÕâÀïÅĞ¶ÏÊÇ·ñ»÷ÖĞÓÃÁË¼¤¹âÖĞ¼äµÄÖ±Ïß½øĞĞµÄÅĞ¶Ï£¬Ò²¾ÍÊÇÍ¨¹ıÅĞ¶Ï¸ÃÖ±ÏßÊÇ·ñ¼ĞÔÚÕ¨µ¯Í¼ĞÎÇøÓòÖ®ÄÚ£¬ËùÒÔ¶ÔÓÚÕâÖÖÅĞ¶ÏÓĞÒ»¸öÈ±Ïİ¾ÍÊÇ²»ÄÜÅĞ¶ÏÁíÒ»¸ö×ø±êÎ¬¶È
+int judge_weapon_pos(int *x, int *y, int p)//è¿™é‡Œåˆ¤æ–­æ˜¯å¦å‡»ä¸­ç”¨äº†æ¿€å…‰ä¸­é—´çš„ç›´çº¿è¿›è¡Œçš„åˆ¤æ–­ï¼Œä¹Ÿå°±æ˜¯é€šè¿‡åˆ¤æ–­è¯¥ç›´çº¿æ˜¯å¦å¤¹åœ¨ç‚¸å¼¹å›¾å½¢åŒºåŸŸä¹‹å†…ï¼Œæ‰€ä»¥å¯¹äºè¿™ç§åˆ¤æ–­æœ‰ä¸€ä¸ªç¼ºé™·å°±æ˜¯ä¸èƒ½åˆ¤æ–­å¦ä¸€ä¸ªåæ ‡ç»´åº¦
 {
 	if ((p <= *x + 8 && p >= *x - 8) || (p >= *y - 8 && p <= *y + 8)) {
 		sum++;
@@ -383,7 +383,7 @@ void clean_star(int x, int y)
 	circle(x, y, 7);
 	fillcircle(x, y, 7);
 }
-void* boom(void* arg)//¶àÏß³Ì¼ÇÊ±²Ù×÷
+void* boom(void* arg)//å¤šçº¿ç¨‹è®°æ—¶æ“ä½œ
 {
 	pthread_testcancel();
 	Sleep(9000);
